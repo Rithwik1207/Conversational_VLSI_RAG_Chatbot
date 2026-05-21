@@ -5,6 +5,11 @@
 An AI-powered conversational tutoring system for VLSI and Digital Design education using Retrieval-Augmented Generation (RAG), hybrid retrieval pipelines, semantic topic memory, and conversational orchestration.
 
 ---
+## Live Demo
+
+Streamlit Deployment:
+
+[Conversational VLSI RAG Tutor](https://convo-vlsi-assistant.streamlit.app/)
 
 ## Project Overview
 
