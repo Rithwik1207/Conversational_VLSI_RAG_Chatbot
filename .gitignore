@@ -7,9 +7,7 @@ __pycache__/
 venv/
 .venv/
 
-*.faiss
-*.pkl
-*.index
+
 *.pdf
 
 
