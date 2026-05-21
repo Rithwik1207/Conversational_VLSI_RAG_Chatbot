@@ -10,6 +10,8 @@ venv/
 *.faiss
 *.pkl
 *.index
+*.pdf
+
 
 .DS_Store
 Thumbs.db
