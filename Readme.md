@@ -1,6 +1,5 @@
 # README.md
 
-````markdown
 # Conversational VLSI RAG Tutor
 
 An AI-powered conversational tutoring system for VLSI and Digital Design education using Retrieval-Augmented Generation (RAG), hybrid retrieval pipelines, semantic topic memory, and conversational orchestration.
