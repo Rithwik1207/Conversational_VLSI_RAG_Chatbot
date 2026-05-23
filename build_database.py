@@ -4,7 +4,6 @@ import faiss
 import pickle
 import numpy as np
 from sentence_transformers import SentenceTransformer
-from groq import Groq
 from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from rank_bm25 import BM25Okapi
@@ -15,18 +14,38 @@ import re
 load_dotenv()
 
 # Local relative path to your textbook
-file_path = './data/VLSI Design_Neil Weste_Text book.pdf'
+PDF_SOURCES = [
 
-if not os.path.exists(file_path):
-    raise FileNotFoundError("Could not find the PDF. Ensure it is in the 'data' folder.")
+    {
+        "path": "./data/VLSI Design_Neil Weste_Text book.pdf",
+
+        "source": "Neil Weste",
+
+        "subject": "VLSI",
+
+        "difficulty": "advanced"
+    },
+
+    {
+        "path": "./data/Morris Mano.pdf",
+
+        "source": "Morris Mano",
+
+        "subject": "Digital Electronics",
+
+        "difficulty": "beginner"
+    }
+]
 
 # --- 2. DATA EXTRACTION & PROCESSING ---
+
 def extract_text_from_pdf(path):
     doc = fitz.open(path)
     full_text = ""
     for page in doc:
         full_text += page.get_text()
     return full_text
+# This function uses a regex pattern to identify textbook-style section headings (e.g., "1.1 Introduction") and splits the text into sections based on these headings. Each section is stored as a dictionary with a "title" and "content". If no headings are found, it returns the entire text as a single section.
 def split_into_sections(text):
 
     # Regex pattern for textbook-style headings
@@ -60,7 +79,16 @@ def split_into_sections(text):
 
     return sections
 
-def create_recursive_chunks(text, source_name="Neil Weste VLSI"):
+def create_recursive_chunks(
+
+    text,
+
+    source_name,
+
+    subject_name,
+
+    difficulty_level
+    ):
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1200,
@@ -85,23 +113,58 @@ def create_recursive_chunks(text, source_name="Neil Weste VLSI"):
             "metadata": {
                 "chunk_id": idx,
                 "source": source_name,
-                "subject": "VLSI",
+                "subject": subject_name,
+                "difficulty": difficulty_level,
                 "chunk_length": len(chunk)
             }
         }
 
         structured_chunks.append(structured_chunk)
-
     return structured_chunks
 
-    chunks = text_splitter.split_text(text)
+print("Extracting and processing textbooks...")
 
-    return chunks
+text_chunks = []
 
-print("Extracting and shredding textbook...")
-raw_book_text = extract_text_from_pdf(file_path)
-text_chunks = create_recursive_chunks(raw_book_text)
-print(f"Total chunks created: {len(text_chunks)}")
+for pdf in PDF_SOURCES:
+
+    pdf_path = pdf["path"]
+
+    source_name = pdf["source"]
+
+    subject_name = pdf["subject"]
+
+    difficulty_level = pdf["difficulty"]
+
+    if not os.path.exists(pdf_path):
+
+        raise FileNotFoundError(
+            f"Could not find PDF: {pdf_path}"
+        )
+
+    print(f"\nProcessing: {source_name}")
+
+    raw_book_text = extract_text_from_pdf(
+        pdf_path
+    )
+
+    chunks = create_recursive_chunks(
+
+        raw_book_text,
+
+        source_name,
+
+        subject_name,
+
+        difficulty_level
+    )
+
+    text_chunks.extend(chunks)
+
+print(
+    f"\nTotal chunks created: "
+    f"{len(text_chunks)}"
+)
 
 # --- 3. VECTOR DATABASE (FAISS) CONSTRUCTION ---
 print("Loading local embedding model...")
